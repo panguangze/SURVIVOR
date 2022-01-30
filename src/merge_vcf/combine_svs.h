@@ -35,6 +35,7 @@ struct meta_data_str{
 	int QV;
 	std::pair<int, int> num_reads;
 	std::string vcf_ID;
+    std::string support_reads;
 	std::pair<std::string, std::string> allleles ; //first=REF; second=ALT
 };
 
@@ -109,6 +110,7 @@ public:
 	std::string genotype;
 	bool types[5];
 	bool strands[4];
+    std::string support_reads;
 };
 
 #include "../structs.h"

@@ -122,6 +122,7 @@ void print_header(FILE *& file, std::vector<std::string> names, std::map<std::st
 	fprintf(file, "%s", "##INFO=<ID=SUPP_VEC,Number=1,Type=String,Description=\"Vector of supporting samples.\">\n");
 	fprintf(file, "%s", "##INFO=<ID=SUPP,Number=1,Type=String,Description=\"Number of samples supporting the variant\">\n");
 	fprintf(file, "%s", "##INFO=<ID=STRANDS,Number=1,Type=String,Description=\"Indicating the direction of the reads with respect to the type and breakpoint.\">\n");
+    fprintf(file, "%s", "##INFO=<ID=READNAMES,Number=1,Type=String,Description=\"Support reads name.\">\n");
 
 	fprintf(file, "%s", "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=PSV,Number=1,Type=String,Description=\"Previous support vector\">\n");
@@ -493,6 +494,8 @@ void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
 	convert << ";SUPP_VEC=";
 	convert << get_support_vec(entry->caller_info); //todo make aware of prev_supp/ supp vec
 	convert << ";SVLEN=";
+    convert << ";READNAMES=";
+    convert << entry->support_reads;
 	if (entry->type == 0) {
 		convert<< (int)entry->caller_info[index]->len *-1;
 	//	convert << (int) round(get_avglen(entry->caller_info)) * -1;
@@ -657,6 +660,7 @@ void combine_calls_svs(std::string files, double max_dist, int min_support, int 
 			tmp.pre_supp_vec = entries[j].prev_support_vec;
 			tmp.vcf_ID = entries[j].sv_id;
 			tmp.allleles = entries[j].alleles;
+            tmp.support_reads = entries[j].support_reads;
 
 			if(start.position==151164){
 				std::cout<<"FOUND "<<std::endl;

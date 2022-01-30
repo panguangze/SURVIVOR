@@ -762,6 +762,12 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 				if (count == 7 && strncmp(&buffer[i], "SVTYPE=", 7) == 0) {
 					tmp.type = get_type(std::string(&buffer[i + 7]));
 				}
+				if (count == 7 && strncmp(&buffer[i], "READNAMES=", 10) == 0) { // for svaba, parsed lumpy and parsed manta
+					tmp.support_reads = std::string(&buffer[i + 10]);
+				}
+				if (count == 7 && strncmp(&buffer[i], "RNAMES=", 7) == 0) { // for sniffles
+					tmp.support_reads = std::string(&buffer[i + 7]);
+				}
 				if (count == 7 && strncmp(&buffer[i], ";SU=", 4) == 0) { //for lumpy!
 					tmp.num_reads.second = atoi(&buffer[i + 4]);
 				}

@@ -49,6 +49,7 @@ public:
 		this->data->second = stop;
 		this->data->type = type;
 		this->data->strand = strands;
+        this->data->support_reads = meta_info.support_reads;
 		if (strands.first) {
 			this->data->strands[0] = true;
 		} else {
