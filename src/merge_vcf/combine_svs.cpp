@@ -54,8 +54,7 @@ std::string get_support_reads(std::vector<Support_Node *> caller_info){
     std::set<std::string> sset;
 //    std::string ss = caller_info[0]->support_reads;
     for (auto & i : caller_info) {
-        std::cout<<i->support_reads<<std::endl;
-                 std::stringstream ss(i->support_reads);
+        std::stringstream ss(i->support_reads);
         while( ss.good() )
         {
             std::string substr;
