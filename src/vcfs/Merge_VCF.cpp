@@ -775,7 +775,7 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 					tmp.support_reads = parse_support_reads(&buffer[i + 10]);
 				}
 				if (count == 7 && strncmp(&buffer[i], "RNAMES=", 7) == 0) { // for sniffles
-					tmp.support_reads = std::string(&buffer[i + 7]);
+					tmp.support_reads = parse_support_reads(&buffer[i + 7]);
 				}
 				if (count == 7 && strncmp(&buffer[i], ";SU=", 4) == 0) { //for lumpy!
 					tmp.num_reads.second = atoi(&buffer[i + 4]);
