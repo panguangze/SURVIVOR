@@ -84,6 +84,7 @@ public:
 		tmp->pre_supp_vec = meta_info.pre_supp_vec;
 		tmp->alleles = meta_info.allleles;
 		tmp->vcf_ID = meta_info.vcf_ID;
+        tmp->support_reads = meta_info.support_reads;
 		data->caller_info.push_back(tmp);
 		height = 0;
 	}

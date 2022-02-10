@@ -6,6 +6,7 @@
  */
 
 #include "combine_svs.h"
+#include <set>
 
 bool is_valid_id(std::string id) {
 	if (id.empty()) {
@@ -48,6 +49,26 @@ std::string get_support_vec(std::vector<Support_Node *> caller_info) {
 		//}
 	}
 	return ss;
+}
+std::string get_support_reads(std::vector<Support_Node *> caller_info){
+    std::set<std::string> sset;
+//    std::string ss = caller_info[0]->support_reads;
+    for (auto & i : caller_info) {
+        std::stringstream ss(i->support_reads);
+        while( ss.good() )
+        {
+            std::string substr;
+            getline( ss, substr, ',' );
+            sset.insert(substr);
+        }
+    }
+    std::string result;
+    for (auto &i : sset) {
+        result.append(i);
+        result.append(",");
+    }
+    result.pop_back();
+    return result;
 }
 int get_support(std::vector<Support_Node *> caller_info) {
 	return caller_info.size();
@@ -495,7 +516,7 @@ void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
 	convert << get_support_vec(entry->caller_info); //todo make aware of prev_supp/ supp vec
 	convert << ";SVLEN=";
     convert << ";READNAMES=";
-    convert << entry->support_reads;
+    convert << get_support_reads(entry->caller_info);
 	if (entry->type == 0) {
 		convert<< (int)entry->caller_info[index]->len *-1;
 	//	convert << (int) round(get_avglen(entry->caller_info)) * -1;

@@ -68,6 +68,7 @@ public:
 	std::string pre_supp_vec;
 	std::pair<std::string,std::string> alleles;
 	std::string vcf_ID;
+    std::string support_reads;
 };
 
 class SVS_Node {
