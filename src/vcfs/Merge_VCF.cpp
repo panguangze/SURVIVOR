@@ -621,6 +621,15 @@ std::string parse_supp_vec(char * buffer) {
 	}
 	return supp;
 }
+std::string parse_support_reads(char * buffer) {
+    size_t i = 0;
+    std::string supp = "";
+    while (buffer[i] != ';' && buffer[i] != '\t') {
+        supp += buffer[i];
+        i++;
+    }
+    return supp;
+}
 
 std::pair<int, int> parse_pair(char * buffer) {
 	std::pair<int, int> pos;
@@ -763,7 +772,7 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 					tmp.type = get_type(std::string(&buffer[i + 7]));
 				}
 				if (count == 7 && strncmp(&buffer[i], "READNAMES=", 10) == 0) { // for svaba, parsed lumpy and parsed manta
-					tmp.support_reads = std::string(&buffer[i + 10]);
+					tmp.support_reads = parse_support_reads(&buffer[i + 10]);
 				}
 				if (count == 7 && strncmp(&buffer[i], "RNAMES=", 7) == 0) { // for sniffles
 					tmp.support_reads = std::string(&buffer[i + 7]);

@@ -146,6 +146,7 @@ public:
 		this->data->caller_info[index]->strand = strands;
 		this->data->caller_info[index]->pre_supp_vec = meta_info.pre_supp_vec;
 		this->data->caller_info[index]->quality.push_back(meta_info.QV);
+        this->data->caller_info[index]->support_reads = meta_info.support_reads;
 
 		if (meta_info.allleles.first.size() > this->data->caller_info[index]->alleles.first.size() || meta_info.allleles.second.size() > this->data->caller_info[index]->alleles.second.size()) {
 			this->data->caller_info[index]->alleles.first = meta_info.allleles.first;
