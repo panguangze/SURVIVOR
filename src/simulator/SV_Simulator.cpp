@@ -304,7 +304,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
 	//indels
 	for (int i = 0; i < par.indel_num; i++) {
 		//std::cout << "indel" << std::endl;
-		if (rand() % 100 <= 50) {
+		if (rand() % 100 <= 15) {
 			mut.type = 1; //insertion
 		} else {
 			mut.type = 4; //deletion

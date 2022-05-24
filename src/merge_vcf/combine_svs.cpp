@@ -147,7 +147,8 @@ void print_header(FILE *& file, std::vector<std::string> names, std::map<std::st
 
 	fprintf(file, "%s", "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=PSV,Number=1,Type=String,Description=\"Previous support vector\">\n");
-	fprintf(file, "%s", "##FORMAT=<ID=LN,Number=1,Type=Integer,Description=\"predicted length\">\n");
+    fprintf(file, "%s", "##FORMAT=<ID=PS,Number=1,Type=Integer,Description=\"Phasing Block No.\">\n");
+    fprintf(file, "%s", "##FORMAT=<ID=LN,Number=1,Type=Integer,Description=\"predicted length\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=DR,Number=2,Type=Integer,Description=\"# supporting reference,variant reads in that order\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=ST,Number=1,Type=String,Description=\"Strand of SVs\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=QV,Number=1,Type=String,Description=\"Quality values: if not defined a . otherwise the reported value.\">\n");
@@ -229,7 +230,7 @@ std::string print_strands(std::pair<bool, bool> strands) {
 }
 
 void print_GTs(std::ostringstream & convert, SVS_Node * entry) {
-	convert << "\tGT:PSV:LN:DR:ST:QV:TY:ID:RAL:AAL:CO";
+	convert << "\tGT:PSV:LN:DR:ST:QV:TY:ID:RAL:AAL:CO:PS";
 	int pos = 0;
 	//std::cout<<"Check: "<<Parameter::Instance()->max_caller <<" vs "<<entry->caller_info.size()<<std::endl;
 	for (size_t i = 0; i < Parameter::Instance()->max_caller; i++) {
@@ -326,10 +327,17 @@ void print_GTs(std::ostringstream & convert, SVS_Node * entry) {
 					convert << "1";
 				}
 			}
+            convert << ":";
+
+            if (entry->caller_info[pos]->phaseset.empty()){
+                convert << "0";
+            } else {
+                convert << entry->caller_info[pos]->phaseset;
+            }
 			pos++;
 		} else { //check len!
 				 //GT:PSV:LN:DR:ST:QV:TY:ID:RAL:AAL:CO
-			convert << "./.:NaN:0:0,0:--:NaN:NaN:NaN:NAN:NAN:NAN";
+			convert << "./.:NaN:0:0,0:--:NaN:NaN:NaN:NAN:NAN:NAN:0";
 		}
 
 	}
@@ -677,7 +685,8 @@ void combine_calls_svs(std::string files, double max_dist, int min_support, int 
 			tmp.genotype = entries[j].genotype;
 			tmp.QV = entries[j].quality;
 			tmp.num_reads = entries[j].num_reads;
-			tmp.sv_len = entries[j].sv_len;
+            tmp.sv_len = entries[j].sv_len;
+			tmp.phaseset = entries[j].phaseset;
 			tmp.pre_supp_vec = entries[j].prev_support_vec;
 			tmp.vcf_ID = entries[j].sv_id;
 			tmp.allleles = entries[j].alleles;

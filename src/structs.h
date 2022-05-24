@@ -32,6 +32,7 @@ struct strvcfentry{
 	std::pair<int,int> num_reads; //ref alt
     std::string support_reads;
 	std::string genotype;
+    std::string phaseset;
 	int sv_len;
 	std::string sv_id;
 	double af;

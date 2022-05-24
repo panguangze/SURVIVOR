@@ -309,6 +309,39 @@ std::pair<bool, bool> parse_strands_lumpy(char * buffer) {
 	return strand;
 }
 
+std::string parse_PS(char *buffer) {
+    std::string res;
+    int count_DV = -1;
+    size_t i = 0;
+    int count = 0;
+    while (buffer[i] != '\t' && (buffer[i] != '\n' && buffer[i] != '\0')) {
+        if (count_DV == -1 && (strncmp(":PS", &buffer[i], 3) == 0 || strncmp("PS:", &buffer[i], 3) == 0)) {
+            count_DV = count;
+            if (buffer[i] == ':') {
+                count_DV++;
+            }
+        }
+        if (buffer[i] == ':') {
+            count++;
+        }
+        i++;
+    }
+    count = 0;
+    while (buffer[i] != '\n' && buffer[i] != '\0') {
+        if (count_DV != -1 && count_DV == count) {
+            //	cout << cout << " " << count_DV << " HIT DV: " << buffer[i] << buffer[i + 1] << buffer[i + 2] << endl;
+            res = &buffer[i];
+            count_DV = -1;
+        }
+
+        if (buffer[i] == ':') {
+            count++;
+        }
+        i++;
+    }
+    return res;
+}
+
 std::pair<int, int> parse_DR(char *buffer) {
 	std::pair<int, int> res;
 	res.first = 0;
@@ -535,7 +568,16 @@ strvcfentry parse_vcf_entry(std::string buffer) {
 				if (tmp.num_reads.first == -1 || tmp.num_reads.second == -1) {
 					tmp.num_reads = parse_DR(&buffer[i]);
 				}
+                if (tmp.phaseset.empty()) {
+                    tmp.phaseset = parse_PS(&buffer[i]);
+                }
 			}
+
+//            if (count == 8 && buffer[i - 1] == '\t') {
+//                if (tmp.phaseset.empty()) {
+//                    tmp.phaseset = parse_PS(&buffer[i]);
+//                }
+//            }
 
 			if (count == 4 && buffer[i - 1] == '<') {
 				tmp.type = get_type(std::string(&buffer[i]));
@@ -702,6 +744,7 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 			//	std::string ref;
 			//	std::string alt;
 			tmp.genotype = "./.";
+            tmp.phaseset = "";
 			tmp.strands.first = true;
 			tmp.strands.second = true;
 			tmp.num_reads.first = 0;
@@ -855,7 +898,12 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 				}
 				if (count == 8 && buffer[i - 1] == '\t') {
 					tmp.num_reads = parse_DR(&buffer[i]);
+                    tmp.phaseset = parse_PS(&buffer[i]);
+//                    std::cout<<tmp.phaseset;
 				}
+//                if (count == 8 && buffer[i - 1] == '\t') {
+//                    tmp.num_reads = parse_DR(&buffer[i]);
+//                }
 				/*
 				 if (count == 8 && strncmp(&buffer[i], "PR:SR", 5) == 0) {
 				 //manta

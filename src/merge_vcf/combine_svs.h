@@ -30,6 +30,7 @@ struct meta_data_str{
 	int caller_id;
 	short type;
 	std::string genotype;
+    std::string phaseset;
 	int sv_len;
 	std::string pre_supp_vec;
 	int QV;
@@ -65,6 +66,7 @@ public:
 	std::pair<int,int> num_support;
 	std::pair<bool,bool> strand;
 	std::string genotype;
+    std::string phaseset;
 	std::string pre_supp_vec;
 	std::pair<std::string,std::string> alleles;
 	std::string vcf_ID;
@@ -76,7 +78,7 @@ public:
 	//just for testing!
 
 	SVS_Node() {
-
+        phaseset = "0";
 		type=-1;
 		num_support.first=-1;
 		num_support.second=-1;
@@ -84,6 +86,7 @@ public:
 		strand.second=false;
 		caller_info.clear();
 		genotype="./.";
+
 
 		types[0]=false; //DEL
 		types[1]=false; //DUP
@@ -109,7 +112,8 @@ public:
 	std::pair<int,int> num_support;
 	std::pair<bool,bool> strand;
 	std::string genotype;
-	bool types[5];
+    std::string phaseset;
+    bool types[5];
 	bool strands[4];
     std::string support_reads;
 };

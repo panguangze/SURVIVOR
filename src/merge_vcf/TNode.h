@@ -63,6 +63,7 @@ public:
 		}
 
 		this->data->genotype = meta_info.genotype; //do I need this?
+        this->data->phaseset = meta_info.phaseset;
 		this->data->types[type] = true;
 
 		init();
@@ -80,6 +81,7 @@ public:
 		tmp->stops.push_back(stop.position);
 		tmp->types.push_back(type);
 		tmp->genotype = meta_info.genotype;
+        tmp->phaseset = meta_info.phaseset;
 		tmp->strand = strands;
 		tmp->pre_supp_vec = meta_info.pre_supp_vec;
 		tmp->alleles = meta_info.allleles;
@@ -143,6 +145,7 @@ public:
 		this->data->caller_info[index]->num_support.first = std::max(meta_info.num_reads.first, this->data->caller_info[index]->num_support.first);
 		this->data->caller_info[index]->num_support.second = std::max(meta_info.num_reads.second, this->data->caller_info[index]->num_support.second);
 		this->data->caller_info[index]->genotype = meta_info.genotype;
+        this->data->caller_info[index]->phaseset = meta_info.phaseset;
 		this->data->caller_info[index]->strand = strands;
 		this->data->caller_info[index]->pre_supp_vec = meta_info.pre_supp_vec;
 		this->data->caller_info[index]->quality.push_back(meta_info.QV);
