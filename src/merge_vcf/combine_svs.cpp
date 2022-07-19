@@ -535,8 +535,6 @@ void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
 	convert << ";SUPP_VEC=";
 	convert << get_support_vec(entry->caller_info); //todo make aware of prev_supp/ supp vec
 	convert << ";SVLEN=";
-    convert << ";READNAMES=";
-    convert << get_support_reads(entry->caller_info);
 //    convert << entry->support_reads;
 
     if (entry->type == 0) {
@@ -548,6 +546,8 @@ void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
 	} else {
 		convert << "0";   // TODO think about it.
 	}
+    convert << ";READNAMES=";
+    convert << get_support_reads(entry->caller_info);
 	/*convert << ";med_start=";
 	 convert << get_start_medpos(entry->caller_info);
 	 convert << ";med_stop=";
