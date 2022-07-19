@@ -816,7 +816,11 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 				}
 				if (count == 7 && strncmp(&buffer[i], "READNAMES=", 10) == 0) { // for svaba, parsed lumpy and parsed manta
 					tmp.support_reads = parse_support_reads(&buffer[i + 10]);
+                    if (tmp.start.pos == 4590484) {
+                        std::cerr<<tmp.support_reads<<std::endl;
+                    }
 				}
+
 				if (count == 7 && strncmp(&buffer[i], "RNAMES=", 7) == 0) { // for sniffles
 					tmp.support_reads = parse_support_reads(&buffer[i + 7]);
 				}

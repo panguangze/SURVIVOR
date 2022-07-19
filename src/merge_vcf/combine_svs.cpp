@@ -432,11 +432,16 @@ void print_entry_overlap_BND(FILE *& file, SVS_Node * entry, int id) {
 }
 
 void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
+//    if (entry-> first.position == 4590484) {
+//        std::cerr<<entry->support_reads<<std::endl;
+//        for (auto item : entry->caller_info) {
+//            std::cerr<<item->support_reads<<std::endl;
+//        }
+//    }
 	std::ostringstream convert;   // stream used for the conversion
 	std::pair<int, int> cipos;
 	std::pair<int, int> ciend;
 	int index = get_index_medpos(entry->caller_info, cipos, ciend);
-
 	convert << entry->first.chr;   //caller_info[index]->starts[0].chr;
 	convert << "\t";
 	if (entry->caller_info[index]->starts[0] != 0) {
@@ -525,7 +530,9 @@ void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
 	convert << ";SVLEN=";
     convert << ";READNAMES=";
     convert << get_support_reads(entry->caller_info);
-	if (entry->type == 0) {
+//    convert << entry->support_reads;
+
+    if (entry->type == 0) {
 		convert<< (int)entry->caller_info[index]->len *-1;
 	//	convert << (int) round(get_avglen(entry->caller_info)) * -1;
 	} else if (entry->type != 3) {
