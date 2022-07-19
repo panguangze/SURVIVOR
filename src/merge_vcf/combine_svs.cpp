@@ -64,8 +64,15 @@ std::string get_support_reads(std::vector<Support_Node *> caller_info){
     }
     std::string result;
     for (auto &i : sset) {
-        result.append(i);
-        result.append(",");
+        std::size_t found = i.find_first_of("-");
+        if (found!=std::string::npos) {
+            auto tmp = i.substr(0,found);
+            result.append(tmp);
+            result.append(",");
+        } else {
+            result.append(i);
+            result.append(",");
+        }
     }
     result.pop_back();
     return result;
