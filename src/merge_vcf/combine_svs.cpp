@@ -150,7 +150,6 @@ void print_header(FILE *& file, std::vector<std::string> names, std::map<std::st
 	fprintf(file, "%s", "##INFO=<ID=SUPP_VEC,Number=1,Type=String,Description=\"Vector of supporting samples.\">\n");
 	fprintf(file, "%s", "##INFO=<ID=SUPP,Number=1,Type=String,Description=\"Number of samples supporting the variant\">\n");
 	fprintf(file, "%s", "##INFO=<ID=STRANDS,Number=1,Type=String,Description=\"Indicating the direction of the reads with respect to the type and breakpoint.\">\n");
-    fprintf(file, "%s", "##INFO=<ID=READNAMES,Number=1,Type=String,Description=\"Support reads name.\">\n");
 
 	fprintf(file, "%s", "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=PSV,Number=1,Type=String,Description=\"Previous support vector\">\n");
@@ -164,7 +163,9 @@ void print_header(FILE *& file, std::vector<std::string> names, std::map<std::st
 	fprintf(file, "%s", "##FORMAT=<ID=RAL,Number=1,Type=String,Description=\"Reference allele sequence reported from input.\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=AAL,Number=1,Type=String,Description=\"Alternative allele sequence reported from input.\">\n");
 	fprintf(file, "%s", "##FORMAT=<ID=CO,Number=1,Type=String,Description=\"Coordinates\">\n");
-	fprintf(file, "%s", "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT");
+    fprintf(file, "%s", "##FORMAT=<ID=READNAMES,Number=G,Type=String,Description=\"Support reads name.\">\n");
+
+    fprintf(file, "%s", "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT");
 	for (size_t i = 0; i < names.size(); i++) {
 		fprintf(file, "%c", '\t');
 		fprintf(file, "%s", names[i].c_str());
@@ -237,7 +238,7 @@ std::string print_strands(std::pair<bool, bool> strands) {
 }
 
 void print_GTs(std::ostringstream & convert, SVS_Node * entry) {
-	convert << "\tGT:PSV:LN:DR:ST:QV:TY:ID:RAL:AAL:CO:PS";
+	convert << "\tGT:PSV:LN:DR:ST:QV:TY:ID:RAL:AAL:CO:PS:READNAMES";
 	int pos = 0;
 	//std::cout<<"Check: "<<Parameter::Instance()->max_caller <<" vs "<<entry->caller_info.size()<<std::endl;
 	for (size_t i = 0; i < Parameter::Instance()->max_caller; i++) {
@@ -340,6 +341,11 @@ void print_GTs(std::ostringstream & convert, SVS_Node * entry) {
                 convert << "0";
             } else {
                 convert << entry->caller_info[pos]->phaseset;
+            }
+            if (entry->caller_info[pos]->support_reads.empty()){
+                convert << ".";
+            } else {
+                convert << entry->caller_info[pos]->support_reads;
             }
 			pos++;
 		} else { //check len!
@@ -546,8 +552,8 @@ void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
 	} else {
 		convert << "0";   // TODO think about it.
 	}
-    convert << ";READNAMES=";
-    convert << get_support_reads(entry->caller_info);
+//    convert << ";READNAMES=";
+//    convert << get_support_reads(entry->caller_info);
 	/*convert << ";med_start=";
 	 convert << get_start_medpos(entry->caller_info);
 	 convert << ";med_stop=";
