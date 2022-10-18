@@ -342,6 +342,40 @@ std::string parse_PS(char *buffer) {
     return res;
 }
 
+std::string parse_RNS(char *buffer) {
+    std::string res;
+    int count_DV = -1;
+    size_t i = 0;
+    int count = 0;
+    while (buffer[i] != '\t' && (buffer[i] != '\n' && buffer[i] != '\0')) {
+        if (count_DV == -1 && (strncmp(":READNAMES", &buffer[i], 10) == 0 || strncmp("READNAMES:", &buffer[i], 10) == 0)) {
+            count_DV = count;
+            if (buffer[i] == ':') {
+                count_DV++;
+            }
+        }
+        if (buffer[i] == ':') {
+            count++;
+        }
+        i++;
+    }
+    count = 0;
+    while (buffer[i] != '\n' && buffer[i] != '\0') {
+        if (count_DV != -1 && count_DV == count) {
+            //	cout << cout << " " << count_DV << " HIT DV: " << buffer[i] << buffer[i + 1] << buffer[i + 2] << endl;
+            res = &buffer[i];
+            count_DV = -1;
+        }
+
+        if (buffer[i] == ':') {
+            count++;
+        }
+        i++;
+    }
+    return res;
+}
+
+
 std::pair<int, int> parse_DR(char *buffer) {
 	std::pair<int, int> res;
 	res.first = 0;
@@ -571,6 +605,9 @@ strvcfentry parse_vcf_entry(std::string buffer) {
                 if (tmp.phaseset.empty()) {
                     tmp.phaseset = parse_PS(&buffer[i]);
                 }
+                if (tmp.support_reads.empty()) {
+                    tmp.support_reads = parse_RNS(&buffer[i]);
+                }
 			}
 
 //            if (count == 8 && buffer[i - 1] == '\t') {
@@ -666,7 +703,7 @@ std::string parse_supp_vec(char * buffer) {
 std::string parse_support_reads(char * buffer) {
     size_t i = 0;
     std::string supp = "";
-    while (buffer[i] != ';' && buffer[i] != '\t') {
+    while (buffer[i] != '\n' && buffer[i] != '\t') {
         supp += buffer[i];
         i++;
     }
@@ -814,16 +851,16 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 				if (count == 7 && strncmp(&buffer[i], "SVTYPE=", 7) == 0) {
 					tmp.type = get_type(std::string(&buffer[i + 7]));
 				}
-				if (count == 7 && strncmp(&buffer[i], "READNAMES=", 10) == 0) { // for svaba, parsed lumpy and parsed manta
-					tmp.support_reads = parse_support_reads(&buffer[i + 10]);
-                    if (tmp.start.pos == 4590484) {
-                        std::cerr<<tmp.support_reads<<std::endl;
-                    }
-				}
-
-				if (count == 7 && strncmp(&buffer[i], "RNAMES=", 7) == 0) { // for sniffles
-					tmp.support_reads = parse_support_reads(&buffer[i + 7]);
-				}
+//				if (count == 7 && strncmp(&buffer[i], "READNAMES=", 10) == 0) { // for svaba, parsed lumpy and parsed manta
+//					tmp.support_reads = parse_support_reads(&buffer[i + 10]);
+//                    if (tmp.start.pos == 4590484) {
+//                        std::cerr<<tmp.support_reads<<std::endl;
+//                    }
+//				}
+//
+//				if (count == 7 && strncmp(&buffer[i], "RNAMES=", 7) == 0) { // for sniffles
+//					tmp.support_reads = parse_support_reads(&buffer[i + 7]);
+//				}
 				if (count == 7 && strncmp(&buffer[i], ";SU=", 4) == 0) { //for lumpy!
 					tmp.num_reads.second = atoi(&buffer[i + 4]);
 				}
@@ -885,6 +922,10 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 					tmp.strands.second = (bool) (buffer[i + 10] == '+');
 				}
 
+//                if (count >= 9 && strncmp(&buffer[i], ":READNAMES\t", 11) == 0) {
+//					tmp.support_reads = parse_support_reads(&buffer[i + 10]);
+//                }
+
 				if (count >= 9 && buffer[i - 1] == '\t' && (tmp.genotype[0] == '.')) { //parsing genotype;
 					size_t j = i;
 					tmp.genotype = "./.";
@@ -903,6 +944,8 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 				if (count == 8 && buffer[i - 1] == '\t') {
 					tmp.num_reads = parse_DR(&buffer[i]);
                     tmp.phaseset = parse_PS(&buffer[i]);
+                    tmp.support_reads = parse_RNS(&buffer[i]);
+//                    std::cout<<tmp.support_reads<<std::endl;
 //                    std::cout<<tmp.phaseset;
 				}
 //                if (count == 8 && buffer[i - 1] == '\t') {

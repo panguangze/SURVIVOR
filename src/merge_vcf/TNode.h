@@ -152,8 +152,9 @@ public:
         if (meta_info.support_reads.length()> 4) {
             if (this->data->caller_info[index]->support_reads == "") {
                 this->data->caller_info[index]->support_reads = meta_info.support_reads;
+//                std::cout<<meta_info.support_reads<<std::endl;
             } else {
-                this->data->caller_info[index]->support_reads = this->data->caller_info[index]->support_reads+"," + meta_info.support_reads;
+//                this->data->caller_info[index]->support_reads = this->data->caller_info[index]->support_reads+"," + meta_info.support_reads;
             }
         }
 

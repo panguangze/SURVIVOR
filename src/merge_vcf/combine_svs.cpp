@@ -340,8 +340,11 @@ void print_GTs(std::ostringstream & convert, SVS_Node * entry) {
             if (entry->caller_info[pos]->phaseset.empty()){
                 convert << "0";
             } else {
-                convert << entry->caller_info[pos]->phaseset;
+                convert << "0";
+//                convert << entry->caller_info[pos]->phaseset;
+//                std::cout<<entry->caller_info[pos]->phaseset<<std::endl;
             }
+            convert << ":";
             if (entry->caller_info[pos]->support_reads.empty()){
                 convert << ".";
             } else {
