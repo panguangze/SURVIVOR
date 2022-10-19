@@ -49,6 +49,7 @@ public:
 		this->data->second = stop;
 		this->data->type = type;
 		this->data->strand = strands;
+        this->data->num_support = meta_info.num_reads;
         this->data->support_reads = meta_info.support_reads;
 		if (strands.first) {
 			this->data->strands[0] = true;
@@ -74,7 +75,7 @@ public:
 			tmp->len = meta_info.sv_len;
 		}
 		tmp->quality.push_back(meta_info.QV);
-		tmp->num_support = meta_info.num_reads;
+//		tmp->num_support = meta_info.num_reads;
 		tmp->id = meta_info.caller_id;
 		tmp->starts.push_back(start.position);
 		tmp->sv_lengths.push_back(meta_info.sv_len);
@@ -87,6 +88,7 @@ public:
 		tmp->alleles = meta_info.allleles;
 		tmp->vcf_ID = meta_info.vcf_ID;
         tmp->support_reads = meta_info.support_reads;
+//        tmp->num_support = meta_info.num_reads;
 		data->caller_info.push_back(tmp);
 		height = 0;
 	}

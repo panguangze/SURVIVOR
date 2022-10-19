@@ -551,12 +551,40 @@ strvcfentry parse_vcf_entry(std::string buffer) {
 			if (count == 7 && strncmp(&buffer[i], "SVTYPE=", 7) == 0) {
 				tmp.type = get_type(std::string(&buffer[i + 7]));
 			}
-			if (count == 7 && strncmp(&buffer[i], ";SU=", 4) == 0) { //for lumpy!
-				tmp.num_reads.second = atoi(&buffer[i + 4]);
-			}
-			if (count == 7 && strncmp(&buffer[i], ";RE=", 4) == 0) { //for sniffles!
-				tmp.num_reads.second = atoi(&buffer[i + 4]);
-			}
+//			if (count == 7 && strncmp(&buffer[i], ";SU=", 4) == 0) { //for lumpy!
+//				tmp.num_reads.second = atoi(&buffer[i + 4]);
+//			}
+//			if (count == 7 && strncmp(&buffer[i], ";RE=", 4) == 0) { //for sniffles!
+//				tmp.num_reads.second = atoi(&buffer[i + 4]);
+//			}
+            if (count == 7 && strncmp(&buffer[i], ";SC=", 4) == 0) { //for lumpy!
+                if (tmp.num_reads.second <= 0) {
+                    tmp.num_reads.second = atoi(&buffer[i + 4]);
+                } else {
+                    tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                }
+            }
+            if (count == 7 && strncmp(&buffer[i], ";SR=", 4) == 0) { //for lumpy!
+                if (tmp.num_reads.second <= 0) {
+                    tmp.num_reads.second = atoi(&buffer[i + 4]);
+                } else {
+                    tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                }
+            }
+            if (count == 7 && strncmp(&buffer[i], ";RE=", 4) == 0) { //for lumpy!
+                if (tmp.num_reads.second <= 0) {
+                    tmp.num_reads.second = atoi(&buffer[i + 4]);
+                } else {
+                    tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                }
+            }
+            if (count == 7 && strncmp(&buffer[i], ";PE=", 4) == 0) { //for lumpy!
+                if (tmp.num_reads.second <= 0) {
+                    tmp.num_reads.second = atoi(&buffer[i + 4]);
+                } else {
+                    tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                }
+            }
 			if (count == 7 && strncmp(&buffer[i], ";AF=", 4) == 0) {
 				tmp.af = atof(&buffer[i + 4]);
 			}
@@ -599,7 +627,7 @@ strvcfentry parse_vcf_entry(std::string buffer) {
 			}
 
 			if (count == 8 && buffer[i - 1] == '\t') {
-				if (tmp.num_reads.first == -1 || tmp.num_reads.second == -1) {
+				if (tmp.num_reads.first == -1 && tmp.num_reads.second == -1) {
 					tmp.num_reads = parse_DR(&buffer[i]);
 				}
                 if (tmp.phaseset.empty()) {
@@ -861,12 +889,41 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 //				if (count == 7 && strncmp(&buffer[i], "RNAMES=", 7) == 0) { // for sniffles
 //					tmp.support_reads = parse_support_reads(&buffer[i + 7]);
 //				}
-				if (count == 7 && strncmp(&buffer[i], ";SU=", 4) == 0) { //for lumpy!
-					tmp.num_reads.second = atoi(&buffer[i + 4]);
-				}
-				if (count == 7 && strncmp(&buffer[i], ";RE=", 4) == 0) { //for sniffles!
-					tmp.num_reads.second = atoi(&buffer[i + 4]);
-				}
+//				if (count == 7 && strncmp(&buffer[i], ";SU=", 4) == 0) { //for lumpy!
+//					tmp.num_reads.second = atoi(&buffer[i + 4]);
+//				}
+                if (count == 7 && strncmp(&buffer[i], ";SC=", 4) == 0) { //for lumpy!
+                    if (tmp.num_reads.second <= 0) {
+                        tmp.num_reads.second = atoi(&buffer[i + 4]);
+                    } else {
+                        tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                    }
+                }
+                if (count == 7 && strncmp(&buffer[i], ";SR=", 4) == 0) { //for lumpy!
+                    if (tmp.num_reads.second <= 0) {
+                        tmp.num_reads.second = atoi(&buffer[i + 4]);
+                    } else {
+                        tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                    }
+                }
+                if (count == 7 && strncmp(&buffer[i], ";RE=", 4) == 0) { //for lumpy!
+                    if (tmp.num_reads.second <= 0) {
+                        tmp.num_reads.second = atoi(&buffer[i + 4]);
+                    } else {
+                        tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                    }
+                }
+                if (count == 7 && strncmp(&buffer[i], ";PE=", 4) == 0) { //for lumpy!
+                    if (tmp.num_reads.second <= 0) {
+                        tmp.num_reads.second = atoi(&buffer[i + 4]);
+                    } else {
+                        tmp.num_reads.second +=  atoi(&buffer[i + 4]);
+                    }
+                }
+
+//				if (count == 7 && strncmp(&buffer[i], ";RE=", 4) == 0) { //for sniffles!
+//					tmp.num_reads.second = atoi(&buffer[i + 4]);
+//				}
 				if (count == 7 && strncmp(&buffer[i], ";CIPOS=", 6) == 0) { //for sniffles!
 					tmp.cpos = parse_pair(&buffer[i + 6]);
 				}
@@ -942,7 +999,8 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 					//	std::cout<<"GO: "<<tmp.genotype<<std::endl;
 				}
 				if (count == 8 && buffer[i - 1] == '\t') {
-					tmp.num_reads = parse_DR(&buffer[i]);
+                    if (tmp.num_reads.first <= 0 && tmp.num_reads.second <= 0)
+					    tmp.num_reads = parse_DR(&buffer[i]);
                     tmp.phaseset = parse_PS(&buffer[i]);
                     tmp.support_reads = parse_RNS(&buffer[i]);
 //                    std::cout<<tmp.support_reads<<std::endl;
