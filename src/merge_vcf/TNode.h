@@ -88,7 +88,7 @@ public:
 		tmp->alleles = meta_info.allleles;
 		tmp->vcf_ID = meta_info.vcf_ID;
         tmp->support_reads = meta_info.support_reads;
-//        tmp->num_support = meta_info.num_reads;
+        tmp->num_support = meta_info.num_reads;
 		data->caller_info.push_back(tmp);
 		height = 0;
 	}
@@ -145,7 +145,7 @@ public:
 		this->data->caller_info[index]->types.push_back(type);
 		this->data->caller_info[index]->sv_lengths.push_back(meta_info.sv_len);
 		this->data->caller_info[index]->num_support.first = std::max(meta_info.num_reads.first, this->data->caller_info[index]->num_support.first);
-		this->data->caller_info[index]->num_support.second = std::max(meta_info.num_reads.second, this->data->caller_info[index]->num_support.second);
+        this->data->caller_info[index]->num_support.second = std::max(meta_info.num_reads.second, this->data->caller_info[index]->num_support.second);
 		this->data->caller_info[index]->genotype = meta_info.genotype;
         this->data->caller_info[index]->phaseset = meta_info.phaseset;
 		this->data->caller_info[index]->strand = strands;

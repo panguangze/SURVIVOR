@@ -555,8 +555,8 @@ void print_entry_overlap(FILE *& file, SVS_Node * entry, int id) {
 	} else {
 		convert << "0";   // TODO think about it.
 	}
-    convert << ";RE=";
-    convert << entry->num_support.second;
+//    convert << ";RE=";
+//    convert << entry->num_support.second;
 	/*convert << ";med_start=";
 	 convert << get_start_medpos(entry->caller_info);
 	 convert << ";med_stop=";

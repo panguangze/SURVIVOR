@@ -999,8 +999,8 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 					//	std::cout<<"GO: "<<tmp.genotype<<std::endl;
 				}
 				if (count == 8 && buffer[i - 1] == '\t') {
-                    if (tmp.num_reads.first <= 0 && tmp.num_reads.second <= 0)
-					    tmp.num_reads = parse_DR(&buffer[i]);
+//                    if (tmp.num_reads.first <= 0 && tmp.num_reads.second <= 0)
+//					    tmp.num_reads = parse_DR(&buffer[i]);
                     tmp.phaseset = parse_PS(&buffer[i]);
                     tmp.support_reads = parse_RNS(&buffer[i]);
 //                    std::cout<<tmp.support_reads<<std::endl;
