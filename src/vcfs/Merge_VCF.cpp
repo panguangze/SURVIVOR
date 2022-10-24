@@ -944,7 +944,7 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 					set_strand = true;
 					tmp.strands.first = (bool) (buffer[i + 4] != '5');
 					tmp.strands.second = (bool) (buffer[i + 7] != '5');
-				}
+                }
 
 				if ((tmp.sv_len == -1 && count == 7) && (strncmp(&buffer[i], ";AVGLEN=", 8) == 0)) {
 					tmp.sv_len = abs((int) atof(&buffer[i + 8]));
@@ -1026,6 +1026,11 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 				if (count == 4 && buffer[i - 1] == '<') {
 					tmp.type = get_type(std::string(&buffer[i]));
 				}
+
+                if (count == 2 && strncmp(&buffer[i], "Manta", 5) == 0) {
+                    tmp.type = get_type(std::string(&buffer[i + 5]));
+//                    std::cout<<tmp.type<<std::endl;
+                }
 
 				if (count == 9 && buffer[i - 1] == '\t') {
 					tmp.calls[filename] = std::string(&buffer[i]);
