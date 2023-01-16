@@ -267,7 +267,7 @@ bool is_overlapping(position curr, std::vector<struct_var> svs) {
 
 	for (size_t i = 0; i < svs.size(); i++) {
 		if (strcmp(svs[i].pos.chr.c_str(), curr.chr.c_str()) == 0) {
-			if (svs[i].pos.stop >= curr.start && svs[i].pos.start <= curr.stop) {
+			if (svs[i].pos.stop + 5000 >= curr.start && svs[i].pos.start <= curr.stop + 5000) {
 				return true;
 			}
 		}
@@ -277,11 +277,11 @@ bool is_overlapping(position curr, std::vector<struct_var> svs) {
 position choose_pos(std::map<std::string, std::string> genome, int min, int max, std::vector<struct_var>& svs) {
 	position pos = get_pos(genome, min, max);
 	int num = 0;
-	while (is_overlapping(pos, svs) && num < 30) {
+	while (is_overlapping(pos, svs) && num < 60) {
 		pos = get_pos(genome, min, max);
 		num++;
 	}
-	if (num == 30) {
+	if (num == 60) {
 		std::cerr << "Terminate program as it could not find a non overlapping region" << std::endl;
 		exit(0);
 	}
@@ -292,7 +292,11 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
 	std::vector<struct_var> svs;
 //duplications
 	struct_var mut;
+    mut.recom = false;
 	for (int i = 0; i < par.dup_num; i++) {
+        if (i == 50 || i == 100) {
+            mut.recom = true;
+        }
 		mut.type = 0;
 		//get_start location;
 		mut.pos = choose_pos(genome, par.dup_min, par.dup_max, svs);
@@ -303,8 +307,11 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
 	}
 	//indels
 	for (int i = 0; i < par.indel_num; i++) {
+        if (i == 50 || i == 100) {
+            mut.recom = true;
+        }
 		//std::cout << "indel" << std::endl;
-		if (rand() % 100 <= 15) {
+		if (rand() % 100 <= 0) {
 			mut.type = 1; //insertion
 		} else {
 			mut.type = 4; //deletion
@@ -317,6 +324,9 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
 	}
 	//inv
 	for (int i = 0; i < par.inv_num; i++) {
+        if (i == 50) {
+            mut.recom = true;
+        }
 		//	std::cout << "inv" << std::endl;
 		mut.type = 2;
 		mut.pos = choose_pos(genome, par.inv_min, par.inv_max, svs);
@@ -425,7 +435,7 @@ std::vector<struct_var> generate_mutations_ref(std::string parameter_file, std::
 	//indels
 	for (int i = 0; i < par.indel_num; i++) {
 		//std::cout << "indel" << std::endl;
-		if (rand() % 100 <= 50) {
+		if (rand() % 100 <= 0) {
 			mut.type = 1; //insertion
 		} else {
 			mut.type = 4; //deletion
@@ -535,7 +545,7 @@ std::string rand_seq(int length) {
 	}
 	return tmp;
 }
-void apply_mutations(std::map<std::string, std::string> &genome, std::vector<struct_var>& svs,int max_dup_amp) {
+void apply_mutations(std::map<std::string, std::string> &genome,std::map<std::string, std::string> &org_genome, std::vector<struct_var>& svs,int max_dup_amp, bool if_recom) {
 	srand(time(NULL));
 	std::vector<insertions> ins;
 	insertions in;
@@ -552,17 +562,36 @@ void apply_mutations(std::map<std::string, std::string> &genome, std::vector<str
 		int num=1;
 		switch (svs[i].type) {
 		case 0:
-			//duplication
-			svs[i].seq = genome[svs[i].pos.chr].substr(svs[i].pos.start, (svs[i].pos.stop - svs[i].pos.start));
-			in.seq = svs[i].seq;
-			in.target = svs[i].pos;	//check
-			num+=rand() % max_dup_amp + 1;
-			svs[i].copy_num=num;
-			while(num>0){
-				store_ins(ins, in);
-				num--;
-			}
+            if (if_recom && svs[i].recom) {
+                svs[i].seq = org_genome[svs[i].pos.chr].substr(svs[i].pos.start, (svs[i].pos.stop - svs[i].pos.start));
+                in.seq = svs[i].seq;
+                in.target = svs[i].pos;	//check
+                num+=rand() % max_dup_amp + 1;
+                svs[i].copy_num=num;
+                while(num>0){
+                    store_ins(ins, in);
+                    num--;
+                }
 
+                for (int j = svs[i].pos.stop; j < svs[i].target.stop + 4500; j++) {
+                    genome[svs[i].target.chr][j] = org_genome[svs[i].target.chr][j];
+                    pos++;
+                }
+
+            } else {
+                if (!svs[i].recom) {
+                    svs[i].seq = genome[svs[i].pos.chr].substr(svs[i].pos.start, (svs[i].pos.stop - svs[i].pos.start));
+                    in.seq = svs[i].seq;
+                    in.target = svs[i].pos;	//check
+                    num+=rand() % max_dup_amp + 1;
+                    svs[i].copy_num=num;
+                    while(num>0){
+                        store_ins(ins, in);
+                        num--;
+                    }
+                }
+            }
+			//duplication
 			break;
 		case 1:
 			//insertion:
@@ -600,12 +629,27 @@ void apply_mutations(std::map<std::string, std::string> &genome, std::vector<str
 		case 4: //deletion: //just mark those regions
 			//std::cout<<"DEL: "<<svs[i].pos.chr<<" "<<svs[i].pos.start <<" "<<svs[i].pos.stop<<" g: "<< genome[svs[i].pos.chr].size()<<std::endl;
 			//	std::cout << "size: " << genome[svs[i].pos.chr].size() << " " << svs[i].pos.start << " " << (svs[i].pos.stop - svs[i].pos.start) << std::endl;
-			svs[i].seq = genome[svs[i].pos.chr][svs[i].pos.start];
-			svs[i].ref = "";
-			for (int j = svs[i].pos.start; j < svs[i].pos.stop; j++) {
-				svs[i].ref += genome[svs[i].pos.chr][j];
-				genome[svs[i].pos.chr][j] = 'X';
-			}
+            if (if_recom && svs[i].recom) {
+                svs[i].seq = genome[svs[i].pos.chr][svs[i].pos.start];
+                svs[i].ref = "";
+                for (int j = svs[i].pos.start; j < svs[i].pos.stop; j++) {
+                    svs[i].ref += genome[svs[i].pos.chr][j];
+                    genome[svs[i].pos.chr][j] = 'X';
+                }
+                for (int j = svs[i].pos.stop; j < svs[i].target.stop + 4500; j++) {
+                    genome[svs[i].target.chr][j] = org_genome[svs[i].target.chr][j];
+                    pos++;
+                }
+            } else {
+                if (!svs[i].recom) {
+                    svs[i].seq = genome[svs[i].pos.chr][svs[i].pos.start];
+                    svs[i].ref = "";
+                    for (int j = svs[i].pos.start; j < svs[i].pos.stop; j++) {
+                        svs[i].ref += genome[svs[i].pos.chr][j];
+                        genome[svs[i].pos.chr][j] = 'X';
+                    }
+                }
+            }
 			break;
 
 		case 5:
@@ -955,7 +999,7 @@ void print_snp_vcf(std::string chr, int pos, char old_allele, char new_allele, F
 	fprintf(file, "%c", '\n');
 }
 
-std::string print_vcf_sv(std::string chr, int pos, int type_id, std::string end_chr, int end_pos, int id, std::string seq, std::string ref, std::string gt,int dup_amp) {
+std::string print_vcf_sv(std::string chr, int pos, int type_id, std::string end_chr, int end_pos, int id, std::string seq, std::string ref, std::string gt,int dup_amp, bool recom) {
 	std::string type = "";
 	switch (type_id) {
 	case 0:
@@ -998,6 +1042,9 @@ std::string print_vcf_sv(std::string chr, int pos, int type_id, std::string end_
 
 	convert << "\t.\tPASS\tPRECISE;SVTYPE=";
 	convert << type;
+    if (recom) {
+        convert << "_recom";
+    }
 	convert << ";SVMETHOD=SURVIVOR_sim;CHR2=";
 	convert << end_chr;
 	convert << ";END=";
@@ -1017,11 +1064,11 @@ void print_vcf_svs(FILE *& file, std::vector<struct_var> svs, int id) {
 	for (size_t i = 0; i < svs.size(); i++) {
 		//write pseudo bed:
 		if (svs[i].type == 3) {
-			fprintf(file, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].target.chr, svs[i].target.start, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num).c_str());
-			fprintf(file, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.stop, svs[i].type, svs[i].target.chr, svs[i].target.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num).c_str());
+			fprintf(file, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].target.chr, svs[i].target.start, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num,svs[i].recom).c_str());
+			fprintf(file, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.stop, svs[i].type, svs[i].target.chr, svs[i].target.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num,svs[i].recom).c_str());
 		} else { // all other types:
 
-			fprintf(file, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].pos.chr, svs[i].pos.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num).c_str());
+			fprintf(file, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].pos.chr, svs[i].pos.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num,svs[i].recom).c_str());
 		}
 		id++;
 	}
@@ -1072,8 +1119,10 @@ void simulate_SV(std::string ref_file, std::string parameter_file, float snp_fre
 	parameter par = parse_param(parameter_file);
 	int min_chr_len = std::max(std::max(par.dup_max, par.indel_max), std::max(par.inv_max, par.translocations_max));
 	std::map<std::string, std::string> genome = read_fasta(ref_file, min_chr_len);
+    std::map<std::string, std::string> genome2;
+    std::map<std::string, std::string> ori_genome = read_fasta(ref_file, min_chr_len);
 
-	if (par.translocations_num > 0 && genome.size() < 2) {
+    if (par.translocations_num > 0 && genome.size() < 2) {
 		std::cerr << "We cannot simulate translocations without a second chromosome" << std::endl;
 		exit(1);
 	}
@@ -1107,8 +1156,12 @@ void simulate_SV(std::string ref_file, std::string parameter_file, float snp_fre
 		} else {
 			snv = mut_snv(genome, snp_freq, file2, id, 1, par.hom_rate);
 		}
-		apply_mutations(genome, svs,par.dup_max_amp);	// apply changes to the genome (e.g. insertions).
-	} else { //real read fake ref!
+        for (auto &item: genome) {
+            genome2[item.first] = item.second;
+        }
+		apply_mutations(genome,ori_genome, svs,par.dup_max_amp,false);	// apply changes to the genome (e.g. insertions).
+        apply_mutations(genome2,ori_genome, svs,par.dup_max_amp,true);	// apply changes to the genome (e.g. insertions).
+    } else { //real read fake ref!
 		svs = generate_mutations_ref(parameter_file, genome);
 		apply_mutations_ref(genome, svs);
 		mut_snv(genome, snp_freq, file2, id, -1, -1); // apply SNV (no indels) -1: cannot be diplod!
@@ -1116,15 +1169,17 @@ void simulate_SV(std::string ref_file, std::string parameter_file, float snp_fre
 	//check_genome(genome, "Post SV simulation");
 
 	/// Start writing out:
-	std::cout << "write genome" << std::endl;
+	std::cout << "write genome1" << std::endl;
 	write_fasta(output_prefix, genome, false);
+    std::cout << "write genome recom" << std::endl;
+    write_fasta(output_prefix, genome2, false);
 	std::cout << "write SV" << std::endl;
 
 	if (par.diploid) {
 		std::cout << "Simulate diploid!" << std::endl;
 
 		genome = read_fasta(ref_file, min_chr_len);
-		if (!coordinates) {
+        if (!coordinates) {
 			std::cerr << "This is not possible" << std::endl;
 			exit(0);
 		}
@@ -1135,25 +1190,24 @@ void simulate_SV(std::string ref_file, std::string parameter_file, float snp_fre
 
 		for (size_t i = 0; i < svs2.size(); i++) {
 			float x = ((float) rand() / (float) (RAND_MAX));
-			if (x < (par.hom_rate)) { // homozygous SV
+			if (x < (par.hom_rate) && (!svs[i].recom && !svs2[i].recom)) { // homozygous SV
 				svs2[i] = svs[i];
 				//svs[i].gt = "1/1";
 				if (svs[i].type == 3) {
-					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].target.chr, svs[i].target.start, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num).c_str());
-					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.stop, svs[i].type, svs[i].target.chr, svs[i].target.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].target.chr, svs[i].target.start, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num,svs[i].recom).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.stop, svs[i].type, svs[i].target.chr, svs[i].target.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num,svs[i].recom).c_str());
 				} else { // all other types:
-					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].pos.chr, svs[i].pos.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].pos.chr, svs[i].pos.stop, id, svs[i].seq, svs[i].ref, "1/1",svs[i].copy_num,svs[i].recom).c_str());
 				}
 				svs2[i].print=false;
 			} else { // het SVs!
 				if (svs[i].type == 3) {
-					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].target.chr, svs[i].target.start, id, svs[i].seq, svs[i].ref, "0|1",svs[i].copy_num).c_str());
-					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.stop, svs[i].type, svs[i].target.chr, svs[i].target.stop, id, svs[i].seq, svs[i].ref, "0|1",svs[i].copy_num).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].target.chr, svs[i].target.start, id, svs[i].seq, svs[i].ref, "0|1",svs[i].copy_num,svs[i].recom).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.stop, svs[i].type, svs[i].target.chr, svs[i].target.stop, id, svs[i].seq, svs[i].ref, "0|1",svs[i].copy_num,svs[i].recom).c_str());
 				} else { // all other types:
-					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].pos.chr, svs[i].pos.stop, id, svs[i].seq, svs[i].ref, "0|1",svs[i].copy_num).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs[i].pos.chr, svs[i].pos.start, svs[i].type, svs[i].pos.chr, svs[i].pos.stop, id, svs[i].seq, svs[i].ref, "0|1",svs[i].copy_num,svs[i].recom).c_str());
 				}
 				id++;
-
 			}
 		}
 
@@ -1178,25 +1232,30 @@ void simulate_SV(std::string ref_file, std::string parameter_file, float snp_fre
 			genome[snv[i].pos.chr][snv[i].pos.start] = snv[i].seq[0];
 			//print_snp_vcf(snv[i].pos.chr, snv[i].pos.start + 1, snv[i].ref[0], snv[i].seq[0], file2, id, "1/1");
 		}
-
+        for (auto &item: genome) {
+            genome2[item.first] = item.second;
+        }
 		//	mut_snv(genome, snp_freq, file2, id, 2,hom_rate); // apply SNV (no indels)
-		apply_mutations(genome, svs2,par.dup_max_amp);
+		apply_mutations(genome, ori_genome,svs2,par.dup_max_amp,false);
+        apply_mutations(genome2,ori_genome, svs2,par.dup_max_amp,true);	// apply changes to the genome (e.g. insertions).
 
-		for (size_t i = 0; i < svs2.size(); i++) {
+        for (size_t i = 0; i < svs2.size(); i++) {
 			if (svs2[i].print) {
 				if (svs2[i].type == 3) {
-					fprintf(file2, "%s", print_vcf_sv(svs2[i].pos.chr, svs2[i].pos.start, svs2[i].type, svs2[i].target.chr, svs2[i].target.start, id, svs2[i].seq, svs2[i].ref, "1|0",svs2[i].copy_num).c_str());
-					fprintf(file2, "%s", print_vcf_sv(svs2[i].pos.chr, svs2[i].pos.stop, svs2[i].type, svs2[i].target.chr, svs2[i].target.stop, id, svs2[i].seq, svs2[i].ref, "1|0",svs2[i].copy_num).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs2[i].pos.chr, svs2[i].pos.start, svs2[i].type, svs2[i].target.chr, svs2[i].target.start, id, svs2[i].seq, svs2[i].ref, "1|0",svs2[i].copy_num,svs2[i].recom).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs2[i].pos.chr, svs2[i].pos.stop, svs2[i].type, svs2[i].target.chr, svs2[i].target.stop, id, svs2[i].seq, svs2[i].ref, "1|0",svs2[i].copy_num,svs2[i].recom).c_str());
 				} else { // all other types:
-					fprintf(file2, "%s", print_vcf_sv(svs2[i].pos.chr, svs2[i].pos.start, svs2[i].type, svs2[i].pos.chr, svs2[i].pos.stop, id, svs2[i].seq, svs2[i].ref, "1|0",svs2[i].copy_num).c_str());
+					fprintf(file2, "%s", print_vcf_sv(svs2[i].pos.chr, svs2[i].pos.start, svs2[i].type, svs2[i].pos.chr, svs2[i].pos.stop, id, svs2[i].seq, svs2[i].ref, "1|0",svs2[i].copy_num,svs2[i].recom).c_str());
 				}
 				id++;
 			}
 
 		}
 
-		std::cout << "write genome" << std::endl;
+		std::cout << "write genome2" << std::endl;
 		write_fasta(output_prefix, genome, true);
+        std::cout << "write genome recom 2" << std::endl;
+        write_fasta(output_prefix, genome2, true);
 		std::cout << "write SV" << std::endl;
 		//	write_sv(output_prefix, svs2);
 		write_sv(output_prefix, svs);

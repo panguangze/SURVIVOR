@@ -66,6 +66,7 @@ struct struct_var {
 	std::string ref;
 	bool print;
 	int copy_num;
+    bool recom;
 };
 
 struct insertions {
