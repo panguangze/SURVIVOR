@@ -742,19 +742,18 @@ void combine_calls_svs(std::string files, double max_dist, int min_support, int 
 
 	for (size_t i = 0; i < keys.size(); i++) {
 		std::vector<SVS_Node *> points = union_set[keys[i]];
-		for (std::vector<SVS_Node *>::reverse_iterator i = points.rbegin(); i != points.rend(); i++) {
-			int support = get_support((*i)->caller_info);
-			int len = 100000;
-			if ((*i)->type != 3) {
-				len = get_avglen((*i)->caller_info);
+		for (auto item = points.rbegin(); item != points.rend(); item++) {
+			volatile int support = get_support((*item)->caller_info);
+            volatile double len = 100000;
+			if ((*item)->type != 3 and (*item)->type != 4) {
+                len = get_avglen((*item)->caller_info);
 			}
-			short type = (*i)->type;
-			if ((*i)->type == -1) {
-				type = 5;
+			if ((*item)->type == -1) {
+                (*item)->type = 5;
 			}
 
 			if (support >= min_support && len > min_svs) {
-				print_entry_overlap(file, (*i), id);
+				print_entry_overlap(file, (*item), id);
 			}
 
 			id++;

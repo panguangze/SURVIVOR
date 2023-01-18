@@ -1081,6 +1081,9 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 			if (tmp.stop.pos == -1 && tmp.sv_len != -1) {
 				tmp.stop.pos = tmp.start.pos + abs(tmp.sv_len);
 			}
+            if (tmp.stop.pos == 12164725) {
+                volatile int tmppp = 44;
+            }
 
 			//if(tmp.start.pos==112179329 || tmp.start.pos==112179238){
 			//	std::cout << "LEN2: " << tmp.start.chr << " " << tmp.start.pos << " " << tmp.stop.chr << " " << tmp.stop.pos << " " << tmp.sv_len << " " << tmp.type << std::endl;
@@ -1088,7 +1091,7 @@ std::vector<strvcfentry> parse_vcf(std::string & filename, int min_svs) {
 
 			//std::cout<<"Call: "<<tmp.start.pos <<" "<<tmp.stop.pos<<" "<<tmp.type<<" "<<tmp.sv_len<<std::endl;
 
-			if ((strcmp(tmp.start.chr.c_str(), tmp.stop.chr.c_str()) != 0 || (tmp.sv_len >= min_svs))) { // || tmp.type==4
+			if ((strcmp(tmp.start.chr.c_str(), tmp.stop.chr.c_str()) != 0 || (tmp.sv_len >= min_svs)) || tmp.type == 4) { // || tmp.type==4
 				/*	std::size_t found = tmp.stop.chr.find("chr");
 				 if (found != std::string::npos) {
 				 tmp.stop.chr.erase(tmp.stop.chr.begin() + found, tmp.stop.chr.begin() + found + 3);
