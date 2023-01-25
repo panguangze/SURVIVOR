@@ -295,7 +295,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
     mut.recom = false;
 	for (int i = 0; i < par.dup_num; i++) {
         mut.recom = false;
-        if (i == 50 || i == 100) {
+        if (i == 0 || i == 1) {
             mut.recom = true;
         }
 		mut.type = 0;
@@ -309,7 +309,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
 	//indels
 	for (int i = 0; i < par.indel_num; i++) {
         mut.recom = false;
-        if (i == 50 || i == 100) {
+        if (i == 0 || i == 1) {
             mut.recom = true;
         }
 		//std::cout << "indel" << std::endl;
@@ -327,7 +327,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
 	//inv
 	for (int i = 0; i < par.inv_num; i++) {
         mut.recom = false;
-        if (i == 50) {
+        if (i == 0) {
             mut.recom = true;
         }
 		//	std::cout << "inv" << std::endl;
