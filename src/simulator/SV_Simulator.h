@@ -17,6 +17,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <unordered_map>
 
 struct parameter {
 	int dup_min;
@@ -57,6 +58,13 @@ struct position {
 	int start;
 	int stop;
 };
+struct dupregion {
+    std::string chr;
+    int start1;
+    int end1;
+    int start2;
+    int end2;
+};
 
 struct struct_var {
 	int type; //0:dup;1:del;2:ins;3:inv;4:tra
@@ -74,6 +82,8 @@ struct insertions {
 	std::string seq;
 };
 
-void simulate_SV(std::string ref_file, std::string parameter_file,float snp_freq, bool coordinates, std::string output_prefix);
+std::vector<std::string> split(const std::string &s, char delim);
+void simulate_SV(std::string ref_file, std::string parameter_file,float snp_freq, bool coordinates, std::string output_prefix, std::string repeat_region);
 void generate_parameter_file(std::string parameter_file);
+std::unordered_map<std::string, std::vector<dupregion>> parser_repeate(std::string repeate_region);
 #endif /* SIMULATOR_SV_SIMULATOR_H_ */

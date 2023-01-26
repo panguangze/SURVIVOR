@@ -57,9 +57,9 @@ void official_interface(int argc, char *argv[]) {
 
 	if (argc > 1) {
 		if (strcmp(argv[1], "simSV") == 0) {
-			if (argc == 7) {
+			if (argc == 8) {
 				bool coordinates = bool(atoi(argv[5]) == 0);
-				simulate_SV(std::string(argv[2]), std::string(argv[3]), atof(argv[4]), coordinates, std::string(argv[6]));
+				simulate_SV(std::string(argv[2]), std::string(argv[3]), atof(argv[4]), coordinates, std::string(argv[6]), std::string(argv[7]));
 				std::cout << "Done: SV+SNP simulated" << std::endl;
 			} else if (argc == 3) {
 				generate_parameter_file(std::string(argv[2]));
