@@ -244,8 +244,8 @@ position get_pos_dup(std::map<std::string, std::string> genome, int min_pos, int
         }
 
         tmp.chr = (*chr).first;
-        tmp.start = ((*duppos).start1 + (*duppos).end1) / 2;
-        tmp.stop = ((*duppos).start2 + (*duppos).end2) / 2;
+        tmp.start = (((*duppos).start1 + (*duppos).end1) / 2);
+        tmp.stop = (((*duppos).start2 + (*duppos).end2) / 2);
 
 //		tmp.start = rand() % (((*chr).second.size() - max_pos)); //choose random start pos within chr length
 //		if (max_pos == -1) {
