@@ -394,7 +394,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
         } else {
             mut.type = 4; //deletion
         }
-        if (mut.recom && i == 50) {
+        if (mut.recom) {
             mut.pos = choose_pos_dup(genome, par.indel_min, par.indel_max, svs, repeate_result);
         } else {
             mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
@@ -1220,12 +1220,12 @@ std::unordered_map<std::string, std::vector<dupregion>> parser_repeate(std::stri
     std::string line;
     while (std::getline(infile, line)) {
         auto vs = split(line, '\t');
-        if ( std::stoi(vs[10]) >= 10000) continue;
-        if (abs(std::stoi(vs[8]) - std::stoi(vs[2])) >= 10000) continue;
+        if ( std::stoi(vs[10]) >= 5000) continue;
+        if (abs(std::stoi(vs[8]) - std::stoi(vs[2])) >= 5000) continue;
         if (vs[1] != vs[7]) continue;
         dupregion dupr;
         std::vector<dupregion> tmp;
-        dupr.chr = vs[0];
+        dupr.chr = vs[1];
         dupr.start1 =  std::stoi(vs[2]);
         dupr.end1 = std::stoi(vs[3]);
         dupr.start2 =  std::stoi(vs[8]);
