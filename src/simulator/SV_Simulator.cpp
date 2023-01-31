@@ -6,6 +6,7 @@
  */
 
 #include "SV_Simulator.h"
+std::vector<int> USED_DUPR;
 
 bool is_valid(char base) {
     return (((base == 'A' || base == 'C') || (base == 'R' || base == 'X')) || ((base == 'T' || base == 'G') || (base == 'N' || base == 'M')));
@@ -220,7 +221,7 @@ float percent_N(std::string seq) {
     return n / size;
 }
 
-position get_pos_dup(std::map<std::string, std::string> genome, int min_pos, int max_pos,std::unordered_map<std::string, std::vector<dupregion>> repeat_region) {
+position get_pos_dup(std::map<std::string, std::string> genome, int min_pos, int max_pos,std::unordered_map<std::string, std::vector<dupregion>> repeat_region, bool is_rev) {
     //std::cout<<max_pos<<std::endl;
     position tmp;
     std::string seq = "N";
@@ -238,10 +239,16 @@ position get_pos_dup(std::map<std::string, std::string> genome, int min_pos, int
         auto duppos = dupr.begin();
         id = rand() % dupr.size(); //chose rand chr.
         count = 0;
+        while ((*duppos).is_rev != is_rev || std::find(USED_DUPR.begin(), USED_DUPR.end(), id) != USED_DUPR.end()) {
+            id = rand() % dupr.size(); //chose rand chr.
+            count = 0;
+            *duppos = dupr[id];
+        }
         while (duppos != dupr.end() && id != count) { //fast forward
             count++;
             duppos++;
         }
+        USED_DUPR.push_back(id);
 
         tmp.chr = (*chr).first;
         tmp.start = (((*duppos).start1 + (*duppos).end1) / 2);
@@ -332,11 +339,11 @@ bool is_overlapping(position curr, std::vector<struct_var> svs) {
     return false;
 }
 
-position choose_pos_dup(std::map<std::string, std::string> genome, int min, int max, std::vector<struct_var>& svs, std::unordered_map<std::string, std::vector<dupregion>> dupr) {
-    position pos = get_pos_dup(genome, min, max, dupr);
+position choose_pos_dup(std::map<std::string, std::string> genome, int min, int max, std::vector<struct_var>& svs, std::unordered_map<std::string, std::vector<dupregion>> dupr, bool is_rev) {
+    position pos = get_pos_dup(genome, min, max, dupr, is_rev);
     int num = 0;
     while (is_overlapping(pos, svs) && num < 60) {
-        pos = get_pos_dup(genome, min, max, dupr);
+        pos = get_pos_dup(genome, min, max, dupr,is_rev);
         num++;
     }
     if (num == 60) {
@@ -373,7 +380,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
         mut.type = 0;
         //get_start location;
         if (mut.recom) {
-            mut.pos = choose_pos_dup(genome, par.dup_min, par.dup_max, svs, repeate_result);
+            mut.pos = choose_pos_dup(genome, par.dup_min, par.dup_max, svs, repeate_result, false);
         } else {
             mut.pos = choose_pos(genome, par.dup_min, par.dup_max, svs);
         }
@@ -395,7 +402,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
             mut.type = 4; //deletion
         }
         if (mut.recom) {
-            mut.pos = choose_pos_dup(genome, par.indel_min, par.indel_max, svs, repeate_result);
+            mut.pos = choose_pos_dup(genome, par.indel_min, par.indel_max, svs, repeate_result, false);
         } else {
             mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
         }
@@ -407,12 +414,18 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
     //inv
     for (int i = 0; i < par.inv_num; i++) {
         mut.recom = false;
-        if (i == 0) {
-            mut.recom = true;
-        }
+//        if (i == 0) {
+//            mut.recom = true;
+//        }
         //	std::cout << "inv" << std::endl;
         mut.type = 2;
+//        if (mut.recom) {
+//            mut.pos = choose_pos_dup(genome, par.inv_min, par.inv_max, svs, repeate_result, true);
+//        } else {
+//            mut.pos = choose_pos(genome, par.inv_min, par.inv_max, svs);
+//        }
         mut.pos = choose_pos(genome, par.inv_min, par.inv_max, svs);
+
         mut.target = mut.pos;
         mut.target.start = mut.pos.stop;
         mut.target.stop = mut.pos.start;
@@ -1220,8 +1233,8 @@ std::unordered_map<std::string, std::vector<dupregion>> parser_repeate(std::stri
     std::string line;
     while (std::getline(infile, line)) {
         auto vs = split(line, '\t');
-        if ( std::stoi(vs[10]) >= 5000) continue;
-        if (abs(std::stoi(vs[8]) - std::stoi(vs[2])) >= 5000) continue;
+        if ( std::stoi(vs[10]) >= 10000) continue;
+        if ((std::stoi(vs[8]) - std::stoi(vs[2]) >= 10000) || (std::stoi(vs[8]) - std::stoi(vs[2]) < 0)) continue;
         if (vs[1] != vs[7]) continue;
         dupregion dupr;
         std::vector<dupregion> tmp;
@@ -1230,6 +1243,7 @@ std::unordered_map<std::string, std::vector<dupregion>> parser_repeate(std::stri
         dupr.end1 = std::stoi(vs[3]);
         dupr.start2 =  std::stoi(vs[8]);
         dupr.end2 = std::stoi(vs[9]);
+        dupr.is_rev = vs[6] == "-";
         if (result.find(vs[1]) == result.end()) {
             tmp.push_back(dupr);
             result[vs[1]] = tmp;

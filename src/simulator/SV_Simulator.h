@@ -64,6 +64,7 @@ struct dupregion {
     int end1;
     int start2;
     int end2;
+    bool is_rev;
 };
 
 struct struct_var {
