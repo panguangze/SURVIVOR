@@ -379,9 +379,9 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
         }
         mut.type = 0;
         //get_start location;
-        if (mut.recom) {
+        if (mut.recom && i == 0) {
             mut.pos = choose_pos_dup(genome, par.dup_min, par.dup_max, svs, repeate_result, false);
-        } else {
+        } else{
             mut.pos = choose_pos(genome, par.dup_min, par.dup_max, svs);
         }
         //get_opposit location
@@ -401,7 +401,7 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
         } else {
             mut.type = 4; //deletion
         }
-        if (mut.recom) {
+        if (mut.recom && i == 0) {
             mut.pos = choose_pos_dup(genome, par.indel_min, par.indel_max, svs, repeate_result, false);
         } else {
             mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
