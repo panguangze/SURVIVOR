@@ -379,11 +379,14 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
         }
         mut.type = 0;
         //get_start location;
-        if (mut.recom && i == 0) {
-            mut.pos = choose_pos_dup(genome, par.dup_min, par.dup_max, svs, repeate_result, false);
-        } else{
-            mut.pos = choose_pos(genome, par.dup_min, par.dup_max, svs);
-        }
+//
+        mut.pos = choose_pos(genome, par.dup_min, par.dup_max, svs);
+
+//        if (mut.recom && i == 0) {
+//            mut.pos = choose_pos_dup(genome, par.dup_min, par.dup_max, svs, repeate_result, false);
+//        } else{
+//            mut.pos = choose_pos(genome, par.dup_min, par.dup_max, svs);
+//        }
         //get_opposit location
         mut.copy_num=1;
         mut.print = true;
@@ -401,11 +404,13 @@ std::vector<struct_var> generate_mutations(std::string parameter_file, std::map<
         } else {
             mut.type = 4; //deletion
         }
-        if (mut.recom && i == 0) {
-            mut.pos = choose_pos_dup(genome, par.indel_min, par.indel_max, svs, repeate_result, false);
-        } else {
-            mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
-        }
+        mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
+
+//        if (mut.recom && i == 0) {
+//            mut.pos = choose_pos_dup(genome, par.indel_min, par.indel_max, svs, repeate_result, false);
+//        } else {
+//            mut.pos = choose_pos(genome, par.indel_min, par.indel_max, svs);
+//        }
         mut.target = mut.pos;
         mut.copy_num=1;
         mut.print = true;
@@ -663,7 +668,7 @@ void apply_mutations(std::map<std::string, std::string> &genome,std::map<std::st
             case 0:
                 //duplication
                 if (if_recom && svs[i].recom) {
-                    svs[i].seq = org_genome[svs[i].pos.chr].substr(svs[i].pos.start, (svs[i].pos.stop - svs[i].pos.start));
+                    svs[i].seq = genome[svs[i].pos.chr].substr(svs[i].pos.start, (svs[i].pos.stop - svs[i].pos.start));
                     in.seq = svs[i].seq;
                     in.target = svs[i].pos;	//check
                     num+=rand() % max_dup_amp + 1;
@@ -671,10 +676,6 @@ void apply_mutations(std::map<std::string, std::string> &genome,std::map<std::st
                     while(num>0){
                         store_ins(ins, in);
                         num--;
-                    }
-
-                    for (int j = svs[i].pos.stop; j < svs[i].pos.stop + 4500; j++) {
-                        genome[svs[i].pos.chr][j] = org_genome[svs[i].pos.chr][j];
                     }
 
                 } else {
@@ -728,14 +729,13 @@ void apply_mutations(std::map<std::string, std::string> &genome,std::map<std::st
                 //std::cout<<"DEL: "<<svs[i].pos.chr<<" "<<svs[i].pos.start <<" "<<svs[i].pos.stop<<" g: "<< genome[svs[i].pos.chr].size()<<std::endl;
                 //	std::cout << "size: " << genome[svs[i].pos.chr].size() << " " << svs[i].pos.start << " " << (svs[i].pos.stop - svs[i].pos.start) << std::endl;
                 if (if_recom && svs[i].recom) {
-                    svs[i].seq = genome[svs[i].pos.chr][svs[i].pos.start];
-                    svs[i].ref = "";
-                    for (int j = svs[i].pos.start; j < svs[i].pos.stop; j++) {
-                        svs[i].ref += genome[svs[i].pos.chr][j];
-                        genome[svs[i].pos.chr][j] = 'X';
-                    }
-                    for (int j = svs[i].pos.stop; j < svs[i].pos.stop + 4500; j++) {
-                        genome[svs[i].pos.chr][j] = org_genome[svs[i].pos.chr][j];
+                    if (!svs[i].recom) {
+                        svs[i].seq = genome[svs[i].pos.chr][svs[i].pos.start];
+                        svs[i].ref = "";
+                        for (int j = svs[i].pos.start; j < svs[i].pos.stop; j++) {
+                            svs[i].ref += genome[svs[i].pos.chr][j];
+                            genome[svs[i].pos.chr][j] = 'X';
+                        }
                     }
                 } else {
                     if (!svs[i].recom) {
